@@ -71,6 +71,9 @@ GitHub Repo: https://github.com/Rods-AI-Consulting/echome-resonance-ui
 
 Vercel/Netlify deploy pending.
 
+## 🎮 Checkers LLM Demo
+
+Run `python3 checkers_llm.py` to chat and play a simple checkers game with a toy Markov model. Moves use coordinates like `a3-b4`.
 
 ---
 
