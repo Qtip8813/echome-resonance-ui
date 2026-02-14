@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ConversationHub from './ConversationHub';
+import ConversationHub from './components/ConversationHub';
 
 function App() {
   const [pro, setPro] = useState(false);
