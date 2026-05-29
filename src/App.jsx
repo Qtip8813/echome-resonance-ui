@@ -1,65 +1,101 @@
 import { useState } from 'react';
 import ConversationHub from './components/ConversationHub';
+import EmotionalSync from './components/EmotionalSync';
 
 function App() {
-  const [pro, setPro] = useState(false);
-  const [exportsUsed, setExportsUsed] = useState(0);
+  const [pro] = useState(false);
+  const [exportsUsed] = useState(0);
 
   const handlePro = () => {
     window.open('https://buy.stripe.com/00weVd16be835Cr57Q8Zq00', '_blank');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-indigo-900 p-4 md:p-8">
-      <div className="container mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent mb-4">
-            🎵 EchoMe Resonance
-          </h1>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto">
-            QRFT-powered audio-to-visual AI for creators
-          </p>
-          {!pro && exportsUsed >= 3 && (
-            <div className="mt-6 p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-xl">
-              <p className="text-yellow-100">Free trial complete. Unlock Pro!</p>
-            </div>
-          )}
+    <div className="min-h-screen bg-surface font-sans">
+      {/* Top nav */}
+      <header className="border-b border-border px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* Logo mark */}
+          <div className="w-6 h-6 rounded bg-accent flex items-center justify-center">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="5" stroke="black" strokeWidth="2" />
+              <circle cx="7" cy="7" r="2" fill="black" />
+            </svg>
+          </div>
+          <span className="text-sm font-semibold text-foreground tracking-tight">EchoMe</span>
+          <span className="text-border">/</span>
+          <span className="text-sm text-muted">Resonance</span>
         </div>
 
-        {/* Main App */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          {exportsUsed < 3 || pro ? (
-            <ConversationHub />
-          ) : (
-            <div className="flex flex-col items-center justify-center min-h-[400px] bg-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/20">
-              <div className="text-center">
-                <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-8 text-3xl">
-                  🔒
-                </div>
-                <h2 className="text-3xl font-bold text-white mb-6">Go Pro for Unlimited</h2>
-                <p className="text-xl text-white/80 mb-8 max-w-md">
-                  Continue creating resonance magic with unlimited exports
-                </p>
-                <button
-                  onClick={handlePro}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-10 py-5 rounded-2xl font-bold text-xl shadow-2xl hover:scale-105 transition-all duration-300"
-                >
-                  🚀 Unlock Pro $9.99/mo
-                </button>
-                <p className="text-white/60 mt-4 text-sm">Cancel anytime</p>
-              </div>
-            </div>
+        <div className="flex items-center gap-3">
+          {/* Status pill */}
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/5">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            <span className="text-xs text-accent font-mono tracking-widest uppercase">emotionalSync</span>
+          </div>
+
+          {!pro && (
+            <button
+              onClick={handlePro}
+              className="text-xs font-semibold px-3 py-1.5 rounded-md bg-accent text-black hover:bg-accent/90 transition-colors"
+            >
+              Upgrade to Pro
+            </button>
           )}
         </div>
+      </header>
 
-        {/* Footer */}
-        <div className="text-center mt-16 pt-12 border-t border-white/20">
-          <p className="text-white/60">
-            © 2026 Rod's AI Consulting LLC | Built with QRFT
-          </p>
-        </div>
+      {/* Page header */}
+      <div className="border-b border-border px-6 py-6">
+        <h1 className="text-xl font-semibold text-foreground">Conversation Orchestration</h1>
+        <p className="text-sm text-muted mt-1 max-w-xl leading-relaxed">
+          QRFT-inspired coherence across multi-model AI sessions with contextual memory weighting
+          and adaptive emotional synchronization.
+        </p>
       </div>
+
+      {/* Main content */}
+      <main className="px-6 py-6">
+        {exportsUsed < 3 || pro ? (
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+            <div className="xl:col-span-2">
+              <ConversationHub />
+            </div>
+            <div>
+              <EmotionalSync />
+            </div>
+          </div>
+        ) : (
+          /* Paywall */
+          <div className="flex flex-col items-center justify-center min-h-[400px] border border-border rounded-xl p-12 bg-card">
+            <div className="w-10 h-10 rounded-full border border-border flex items-center justify-center mb-6">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <rect x="4" y="8" width="10" height="8" rx="1" stroke="currentColor" strokeWidth="1.5" className="text-muted" />
+                <path d="M6 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" strokeWidth="1.5" className="text-muted" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-semibold text-foreground mb-2">Unlimited exports with Pro</h2>
+            <p className="text-sm text-muted mb-6 text-center max-w-sm leading-relaxed">
+              You&apos;ve used your 3 free exports. Upgrade to Pro for unlimited conversation exports
+              and advanced resonance features.
+            </p>
+            <button
+              onClick={handlePro}
+              className="px-6 py-2.5 bg-accent text-black text-sm font-semibold rounded-md hover:bg-accent/90 transition-colors"
+            >
+              Unlock Pro — $9.99 / mo
+            </button>
+            <p className="text-xs text-muted mt-3">Cancel anytime</p>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border px-6 py-4 mt-8">
+        <p className="text-xs text-muted">
+          © 2026 Rod&apos;s AI Consulting LLC &nbsp;·&nbsp; EchoMe &nbsp;·&nbsp; QRFT &nbsp;·&nbsp; emotionalSync
+        </p>
+      </footer>
     </div>
   );
 }

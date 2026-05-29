@@ -1,3 +1,58 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark terminal palette */
+    --color-surface:      #0a0a0a;   /* page background */
+    --color-card:         #111111;   /* card / panel */
+    --color-border:       #222222;   /* borders / dividers */
+    --color-foreground:   #ededed;   /* primary text */
+    --color-muted:        #777777;   /* secondary / label text */
+    --color-accent:       #00e5c4;   /* brand accent — electric teal */
+  }
+
+  html {
+    background-color: var(--color-surface);
+  }
+
+  body {
+    color: var(--color-foreground);
+    background-color: var(--color-surface);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Native select / option dark reset */
+  select option {
+    background-color: #1a1a1a;
+    color: #ededed;
+  }
+
+  /* Range input track */
+  input[type='range'] {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-border);
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+  }
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    border: 2px solid var(--color-surface);
+    cursor: pointer;
+  }
+  input[type='range']::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    border: 2px solid var(--color-surface);
+    cursor: pointer;
+  }
+}
