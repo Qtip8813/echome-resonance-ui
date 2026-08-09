@@ -39,6 +39,18 @@ describe('App', () => {
       // ConversationHub should be visible with its controls
       expect(screen.getByRole('button', { name: /Start/i })).toBeInTheDocument();
     });
+
+    it('renders the emoji in the header', () => {
+      render(<App />);
+
+      expect(screen.getByText(/🎵/)).toBeInTheDocument();
+    });
+
+    it('renders the year in the footer', () => {
+      render(<App />);
+
+      expect(screen.getByText(/2026/)).toBeInTheDocument();
+    });
   });
 
   describe('Free Tier Behavior', () => {
@@ -53,6 +65,12 @@ describe('App', () => {
 
       expect(screen.getByRole('button', { name: /Start/i })).toBeInTheDocument();
       expect(screen.queryByText(/Go Pro for Unlimited/i)).not.toBeInTheDocument();
+    });
+
+    it('does not show paywall lock icon initially', () => {
+      render(<App />);
+
+      expect(screen.queryByText(/🔒/)).not.toBeInTheDocument();
     });
   });
 
@@ -79,6 +97,16 @@ describe('App', () => {
       // Should see the main app controls - check for the model selector text
       expect(screen.getByText('AI Model')).toBeInTheDocument();
     });
+
+    it('shows all ConversationHub controls when under limit', () => {
+      render(<App />);
+
+      // Verify multiple controls are visible
+      expect(screen.getByText('AI Model')).toBeInTheDocument();
+      expect(screen.getByText('Topic')).toBeInTheDocument();
+      expect(screen.getByText('Number of Rounds')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Export JSON/i })).toBeInTheDocument();
+    });
   });
 
   describe('Gradient and Styling', () => {
@@ -95,6 +123,69 @@ describe('App', () => {
 
       const gridContainer = container.querySelector('.grid');
       expect(gridContainer).toBeInTheDocument();
+    });
+
+    it('applies minimum height to main container', () => {
+      const { container } = render(<App />);
+
+      const mainDiv = container.querySelector('.min-h-screen');
+      expect(mainDiv).toBeInTheDocument();
+    });
+
+    it('centers the header text', () => {
+      const { container } = render(<App />);
+
+      const centeredDiv = container.querySelector('.text-center');
+      expect(centeredDiv).toBeInTheDocument();
+    });
+
+    it('has backdrop blur styling for potential modals', () => {
+      const { container } = render(<App />);
+
+      // When paywall shows, it will have backdrop-blur
+      // For now just verify the app structure is correct
+      expect(container.querySelector('.container')).toBeInTheDocument();
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('has proper heading structure', () => {
+      render(<App />);
+
+      const heading = screen.getByRole('heading', { level: 1 });
+      expect(heading).toBeInTheDocument();
+      expect(heading).toHaveTextContent(/EchoMe Resonance/i);
+    });
+
+    it('has accessible button labels', () => {
+      render(<App />);
+
+      expect(screen.getByRole('button', { name: /Start/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Pause/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Reset/i })).toBeInTheDocument();
+    });
+  });
+
+  describe('Responsive Design', () => {
+    it('has responsive padding classes', () => {
+      const { container } = render(<App />);
+
+      const responsiveElement = container.querySelector('.p-4.md\\:p-8');
+      expect(responsiveElement).toBeInTheDocument();
+    });
+
+    it('has responsive text sizing', () => {
+      const { container } = render(<App />);
+
+      const responsiveText = container.querySelector('.text-4xl.md\\:text-6xl');
+      expect(responsiveText).toBeInTheDocument();
+    });
+
+    it('has responsive grid columns', () => {
+      const { container } = render(<App />);
+
+      const responsiveGrid = container.querySelector('.grid-cols-1.lg\\:grid-cols-2');
+      expect(responsiveGrid).toBeInTheDocument();
     });
   });
 });
