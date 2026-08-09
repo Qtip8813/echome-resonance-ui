@@ -351,5 +351,272 @@ describe('ConversationHub', () => {
       const avgTimeElements = screen.getAllByText(/Avg Response Time:/i);
       expect(avgTimeElements.length).toBe(3);
     });
+
+    it('displays success rate for each model', () => {
+      render(<ConversationHub />);
+
+      const successRateElements = screen.getAllByText(/Success Rate:/i);
+      expect(successRateElements.length).toBe(3);
+    });
+
+    it('shows initial success rate as 0%', () => {
+      render(<ConversationHub />);
+
+      const successRateElements = screen.getAllByText(/Success Rate: 0%/i);
+      expect(successRateElements.length).toBe(3);
+    });
+  });
+
+  describe('Participant Order Handling', () => {
+    it('cycles through participants in order', () => {
+      render(<ConversationHub />);
+
+      // Default order: ChatGPT-4, Claude-3, Gemini-Pro
+      fireEvent.click(screen.getByRole('button', { name: /Start/i }));
+
+      // Run 3 rounds to cycle through all
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+
+      expect(screen.getByText(/Rounds Completed: 3/i)).toBeInTheDocument();
+    });
+
+    it('handles custom participant order', () => {
+      render(<ConversationHub />);
+
+      const inputs = screen.getAllByRole('textbox');
+      const participantInput = inputs[2];
+      fireEvent.change(participantInput, { target: { value: 'Claude-3, Gemini-Pro' } });
+
+      fireEvent.click(screen.getByRole('button', { name: /Start/i }));
+
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+
+      expect(screen.getByText(/Rounds Completed: 1/i)).toBeInTheDocument();
+    });
+
+    it('handles single participant', () => {
+      render(<ConversationHub />);
+
+      const inputs = screen.getAllByRole('textbox');
+      const participantInput = inputs[2];
+      fireEvent.change(participantInput, { target: { value: 'Claude-3' } });
+
+      fireEvent.click(screen.getByRole('button', { name: /Start/i }));
+
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+
+      expect(screen.getByText(/Rounds Completed: 2/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('History Management', () => {
+    it('adds context injection to history', () => {
+      render(<ConversationHub />);
+
+      const textarea = document.querySelector('textarea');
+      fireEvent.change(textarea, { target: { value: 'Injected context data' } });
+
+      fireEvent.click(screen.getByRole('button', { name: /Inject/i }));
+
+      // Context should be cleared after injection
+      expect(textarea.value).toBe('');
+    });
+
+    it('allows multiple context injections', () => {
+      render(<ConversationHub />);
+
+      const textarea = document.querySelector('textarea');
+
+      // First injection
+      fireEvent.change(textarea, { target: { value: 'First context' } });
+      fireEvent.click(screen.getByRole('button', { name: /Inject/i }));
+
+      // Second injection
+      fireEvent.change(textarea, { target: { value: 'Second context' } });
+      fireEvent.click(screen.getByRole('button', { name: /Inject/i }));
+
+      expect(textarea.value).toBe('');
+    });
+
+    it('builds history through multiple rounds', () => {
+      render(<ConversationHub />);
+
+      // Set to 3 rounds
+      const roundsInput = screen.getByRole('spinbutton');
+      fireEvent.change(roundsInput, { target: { value: '3' } });
+
+      fireEvent.click(screen.getByRole('button', { name: /Start/i }));
+
+      // Run exactly 3 rounds (each round takes 1000ms)
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+
+      expect(screen.getByText(/Rounds Completed: 3/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('handles zero rounds gracefully', () => {
+      render(<ConversationHub />);
+
+      const roundsInput = screen.getByRole('spinbutton');
+      fireEvent.change(roundsInput, { target: { value: '0' } });
+
+      fireEvent.click(screen.getByRole('button', { name: /Start/i }));
+
+      // Should immediately stop since 0 rounds
+      expect(screen.getByRole('button', { name: /Start/i })).not.toBeDisabled();
+    });
+
+    it('handles large number of rounds', () => {
+      render(<ConversationHub />);
+
+      const roundsInput = screen.getByRole('spinbutton');
+      fireEvent.change(roundsInput, { target: { value: '100' } });
+
+      expect(roundsInput.value).toBe('100');
+    });
+
+    it('handles rapid start/pause clicking', () => {
+      render(<ConversationHub />);
+
+      fireEvent.click(screen.getByRole('button', { name: /Start/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Pause/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Start/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Pause/i }));
+
+      // Should be paused
+      expect(screen.getByRole('button', { name: /Start/i })).not.toBeDisabled();
+    });
+
+    it('maintains state after multiple resets', () => {
+      render(<ConversationHub />);
+
+      // Run some rounds
+      fireEvent.click(screen.getByRole('button', { name: /Start/i }));
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+      fireEvent.click(screen.getByRole('button', { name: /Reset/i }));
+
+      // Run again
+      fireEvent.click(screen.getByRole('button', { name: /Start/i }));
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      fireEvent.click(screen.getByRole('button', { name: /Reset/i }));
+
+      expect(screen.getByText(/Rounds Completed: 0/i)).toBeInTheDocument();
+    });
+
+    it('exports with empty history', () => {
+      const mockClick = vi.fn();
+      const originalCreateElement = document.createElement.bind(document);
+      document.createElement = vi.fn((tag) => {
+        if (tag === 'a') {
+          return { click: mockClick, href: '', download: '' };
+        }
+        return originalCreateElement(tag);
+      });
+
+      render(<ConversationHub />);
+
+      // Export without any rounds
+      fireEvent.click(screen.getByRole('button', { name: /Export JSON/i }));
+
+      expect(URL.createObjectURL).toHaveBeenCalled();
+      expect(mockClick).toHaveBeenCalled();
+
+      document.createElement = originalCreateElement;
+    });
+  });
+
+  describe('Form Validation', () => {
+    it('allows empty conversation type', () => {
+      render(<ConversationHub />);
+
+      const inputs = screen.getAllByRole('textbox');
+      const conversationTypeInput = inputs[0];
+
+      expect(conversationTypeInput.value).toBe('');
+
+      // Should still be able to start
+      expect(screen.getByRole('button', { name: /Start/i })).not.toBeDisabled();
+    });
+
+    it('allows empty topic', () => {
+      render(<ConversationHub />);
+
+      const inputs = screen.getAllByRole('textbox');
+      const topicInput = inputs[1];
+
+      expect(topicInput.value).toBe('');
+
+      // Should still be able to start
+      expect(screen.getByRole('button', { name: /Start/i })).not.toBeDisabled();
+    });
+
+    it('preserves input values on pause and resume', () => {
+      render(<ConversationHub />);
+
+      const inputs = screen.getAllByRole('textbox');
+      const topicInput = inputs[1];
+      fireEvent.change(topicInput, { target: { value: 'Test Topic' } });
+
+      fireEvent.click(screen.getByRole('button', { name: /Start/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Pause/i }));
+
+      expect(topicInput.value).toBe('Test Topic');
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('has labeled form controls', () => {
+      render(<ConversationHub />);
+
+      expect(screen.getByText('AI Model')).toBeInTheDocument();
+      expect(screen.getByText('Conversation Type')).toBeInTheDocument();
+      expect(screen.getByText('Topic')).toBeInTheDocument();
+      expect(screen.getByText('Number of Rounds')).toBeInTheDocument();
+    });
+
+    it('has a combobox for model selection', () => {
+      render(<ConversationHub />);
+
+      const combobox = screen.getByRole('combobox');
+      expect(combobox).toBeInTheDocument();
+    });
+
+    it('has a spinbutton for number input', () => {
+      render(<ConversationHub />);
+
+      const spinbutton = screen.getByRole('spinbutton');
+      expect(spinbutton).toBeInTheDocument();
+    });
+
+    it('disables pause button when not running', () => {
+      render(<ConversationHub />);
+
+      expect(screen.getByRole('button', { name: /Pause/i })).toBeDisabled();
+    });
   });
 });
