@@ -1,5 +1,9 @@
 import { webcrypto } from "node:crypto";
+import { TextDecoder, TextEncoder } from "node:util";
 import { describe, expect, it } from "vitest";
+
+globalThis.TextEncoder ??= TextEncoder;
+globalThis.TextDecoder ??= TextDecoder;
 
 if (!globalThis.crypto?.subtle) {
   Object.defineProperty(globalThis, "crypto", { value: webcrypto, configurable: true });
