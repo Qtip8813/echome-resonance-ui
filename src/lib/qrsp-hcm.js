@@ -30,6 +30,38 @@ export const PROVENANCE = Object.freeze([
   "UNKNOWN",
 ]);
 
+const FIELD_CODES = Object.freeze({
+  identity: 1,
+  constraints: 2,
+  decisions: 3,
+  knowledge: 4,
+  relationships: 5,
+  history: 6,
+  objectives: 7,
+  updates: 8,
+});
+
+export function encodeBase15Quadruple(number) {
+  if (!Number.isInteger(number) || number < 0 || number >= 15 ** 4) {
+    throw new RangeError("Base-15 value must be an integer from 0 through 50,624.");
+  }
+  let remainder = number;
+  const digits = [];
+  for (let index = 0; index < 4; index += 1) {
+    digits.unshift(remainder % 15);
+    remainder = Math.floor(remainder / 15);
+  }
+  return digits;
+}
+
+export function decodeBase15Quadruple(digits) {
+  if (!Array.isArray(digits) || digits.length !== 4 ||
+      digits.some((digit) => !Number.isInteger(digit) || digit < 0 || digit >= 15)) {
+    throw new TypeError("A base-15 quadruple must contain exactly four integers from 0 through 14.");
+  }
+  return digits.reduce((value, digit) => value * 15 + digit, 0);
+}
+
 function canonicalize(value) {
   if (value === null || typeof value !== "object") return value;
   if (Array.isArray(value)) return value.map(canonicalize);
@@ -111,6 +143,7 @@ export function buildManifest(context) {
     .map(([field, symbol]) => ({
       field,
       symbol,
+      base15Residence: encodeBase15Quadruple(FIELD_CODES[field]),
       itemCount: Array.isArray(context[field])
         ? context[field].length
         : context[field] && typeof context[field] === "object"
@@ -127,7 +160,10 @@ export async function encodeContext(context) {
   validateContext(context);
   const json = stableStringify(context);
   const rawBytes = new TextEncoder().encode(json);
-  const compressed = await transformStream(rawBytes, "deflate", "compress");
+  const canRoundTripDeflate = Boolean(globalThis.CompressionStream && globalThis.DecompressionStream);
+  const compressed = canRoundTripDeflate
+    ? await transformStream(rawBytes, "deflate", "compress")
+    : null;
   const payloadBytes = compressed || rawBytes;
   const digest = await sha256Hex(rawBytes);
 
