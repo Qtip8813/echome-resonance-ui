@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import HarmonicContextMemory from './HarmonicContextMemory';
 
 const models = ['ChatGPT-4', 'Claude-3', 'Gemini-Pro'];
 
@@ -187,6 +188,14 @@ function ConversationHub() {
           Inject
         </button>
       </div>
+
+      <HarmonicContextMemory
+        history={history}
+        topic={topic}
+        conversationType={conversationType}
+        participantOrder={participantOrder}
+        extraContext={context}
+      />
 
       <div className="space-x-4">
         <button className="px-4 py-2 bg-gray-800 text-white rounded" onClick={exportJSON}>
