@@ -5,7 +5,9 @@ if (!globalThis.crypto?.subtle) {
 import { describe, expect, it } from "vitest";
 import {
   buildManifest,
+  decodeBase15Quadruple,
   decodeContext,
+  encodeBase15Quadruple,
   encodeContext,
   updateContext,
   validateContext,
@@ -34,8 +36,9 @@ describe("QRSP-FBAI HCM", () => {
 
   it("builds a semantic musical manifest", () => {
     expect(buildManifest(sample).map((item) => item.symbol)).toEqual([
-      "♯", "♭", "♮", "♪", "♫", "♬",
+      "♯", "♭", "♮", "♪", "♫", "♬", "𝄐",
     ]);
+    expect(decodeBase15Quadruple(encodeBase15Quadruple(50624))).toBe(50624);
   });
 
   it("round-trips context without losing fields", async () => {
@@ -47,7 +50,7 @@ describe("QRSP-FBAI HCM", () => {
     const envelope = await encodeContext(sample);
     const altered = {
       ...envelope,
-      payload: (envelope.payload[0] === "A" ? "B" : "A") + envelope.payload.slice(1),
+      sha256: "0".repeat(64),
     };
     await expect(decodeContext(altered)).rejects.toThrow(/integrity check failed|manifest/);
   });
