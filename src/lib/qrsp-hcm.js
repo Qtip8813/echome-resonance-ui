@@ -104,7 +104,11 @@ async function sha256Hex(bytes) {
 async function transformStream(bytes, format, direction) {
   const StreamConstructor =
     direction === "compress" ? globalThis.CompressionStream : globalThis.DecompressionStream;
-  if (!StreamConstructor) return null;
+  if (
+    !StreamConstructor ||
+    typeof globalThis.Blob?.prototype?.stream !== "function" ||
+    typeof globalThis.Response === "undefined"
+  ) return null;
 
   try {
     const stream = new Blob([bytes]).stream().pipeThrough(new StreamConstructor(format));
@@ -160,7 +164,12 @@ export async function encodeContext(context) {
   validateContext(context);
   const json = stableStringify(context);
   const rawBytes = new TextEncoder().encode(json);
-  const canRoundTripDeflate = Boolean(globalThis.CompressionStream && globalThis.DecompressionStream);
+  const canRoundTripDeflate = Boolean(
+    globalThis.CompressionStream &&
+    globalThis.DecompressionStream &&
+    typeof globalThis.Blob?.prototype?.stream === "function" &&
+    typeof globalThis.Response !== "undefined"
+  );
   const compressed = canRoundTripDeflate
     ? await transformStream(rawBytes, "deflate", "compress")
     : null;
