@@ -130,3 +130,28 @@ Fork the repo. Build the node. Join the field. Let’s echo forward.
 
 
 
+
+
+## QRSP-FBAI Harmonic Context Memory (HCM)
+
+The Conversation Hub includes an experimental HCM panel for turning the current
+conversation setup and local history into a portable, reversible context envelope.
+
+- Musical symbols form a semantic manifest for identity, constraints, decisions,
+  knowledge, relationships, history, objectives, and updates.
+- The canonical JSON payload is retained losslessly and optionally compressed
+  with the browser's Deflate streams.
+- SHA-256 detects payload changes during decoding.
+- Provenance labels are validated rather than silently discarded.
+- HCM is model-independent; it does not call an LLM or claim to prevent drift by
+  itself.
+
+Run the codec tests with:
+
+```bash
+npm run test:run
+```
+
+**Measurement note:** payload byte reduction is not the same as LLM token
+reduction. Token savings and drift resistance require separate benchmarks
+against the target model tokenizer and a fixed evaluation set.
