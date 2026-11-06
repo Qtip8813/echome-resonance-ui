@@ -1,8 +1,9 @@
 import { webcrypto } from "node:crypto";
+import { describe, expect, it } from "vitest";
+
 if (!globalThis.crypto?.subtle) {
   Object.defineProperty(globalThis, "crypto", { value: webcrypto, configurable: true });
 }
-import { describe, expect, it } from "vitest";
 import {
   buildManifest,
   decodeBase15Quadruple,
