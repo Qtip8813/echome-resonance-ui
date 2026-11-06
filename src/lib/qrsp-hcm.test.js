@@ -1,3 +1,7 @@
+import { webcrypto } from "node:crypto";
+if (!globalThis.crypto?.subtle) {
+  Object.defineProperty(globalThis, "crypto", { value: webcrypto, configurable: true });
+}
 import { describe, expect, it } from "vitest";
 import {
   buildManifest,
@@ -43,7 +47,7 @@ describe("QRSP-FBAI HCM", () => {
     const envelope = await encodeContext(sample);
     const altered = {
       ...envelope,
-      payload: envelope.payload.slice(0, -2) + "AA",
+      payload: (envelope.payload[0] === "A" ? "B" : "A") + envelope.payload.slice(1),
     };
     await expect(decodeContext(altered)).rejects.toThrow(/integrity check failed|manifest/);
   });
